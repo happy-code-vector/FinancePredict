@@ -49,6 +49,8 @@ R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "")  # e.g. https://bucket.r2.dev
 COINGLASS_API_KEY = os.getenv("COINGLASS_API_KEY", "")
 CRYPTOQUANT_API_KEY = os.getenv("CRYPTOQUANT_API_KEY", "")
 LUNARCRUSH_API_KEY = os.getenv("LUNARCRUSH_API_KEY", "")
+FRED_API_KEY = os.getenv("FRED_API_KEY", "")
+GNEWS_API_KEY = os.getenv("GNEWS_API_KEY", "")
 
 # ---------------------------------------------------------------------------
 # Timing

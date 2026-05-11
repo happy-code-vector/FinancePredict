@@ -15,6 +15,7 @@ ccxt
 requests
 boto3
 aiobotocore
+fredapi
 
 # Encryption
 timelock
