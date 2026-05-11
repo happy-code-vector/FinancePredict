@@ -6,8 +6,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY miner/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
+
+# timelock needs special handling — its wasm_wrapper dep is missing on PyPI
+RUN pip install --no-cache-dir --no-deps timelock
+
+# bittensor for on-chain commit + wallet access
+RUN pip install --no-cache-dir bittensor
 
 COPY miner/ ./miner/
 COPY config.py utils.py generate_and_encrypt.py ./

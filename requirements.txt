@@ -1,5 +1,4 @@
-# Core
-bittensor
+# Core ML
 numpy
 pandas
 scikit-learn
@@ -15,13 +14,9 @@ ccxt
 requests
 boto3
 aiobotocore
-fredapi
 
 # Encryption
-timelock
 cryptography
 
 # Config
 python-dotenv
-
-# Async runtime (stdlib asyncio is sufficient)
