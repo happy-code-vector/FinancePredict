@@ -15,9 +15,12 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 MINER_ROOT = Path(__file__).resolve().parent
-DB_PATH = MINER_ROOT / "miner.duckdb"
-MODEL_DIR = MINER_ROOT / "saved_models"
-DATA_DIR = MINER_ROOT / "data_cache"
+
+# Docker volumes mount at /app/data and /app/saved_models
+# Local runs use miner/ subdirectories
+DATA_DIR = Path(os.getenv("MANTIS_DATA_DIR", str(MINER_ROOT / "data_cache")))
+MODEL_DIR = Path(os.getenv("MANTIS_MODEL_DIR", str(MINER_ROOT / "saved_models")))
+DB_PATH = DATA_DIR / "miner.duckdb"
 PARQUET_DIR = DATA_DIR / "parquet"
 
 for d in (MODEL_DIR, DATA_DIR, PARQUET_DIR):
