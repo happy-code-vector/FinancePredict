@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY miner/ ./miner/
+COPY config.py utils.py generate_and_encrypt.py range_breakout.py ./
+
+ENV PYTHONPATH=/app:/app/miner
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python", "-m", "miner.training.run_trainer"]

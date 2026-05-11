@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.egg-info/
+.venv/
+data_cache/
+saved_models/
+*.duckdb
+datalog.db

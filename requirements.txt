@@ -1,0 +1,26 @@
+# Core
+bittensor
+numpy
+pandas
+scikit-learn
+lightgbm
+scipy
+arch
+duckdb
+joblib
+
+# Data
+yfinance
+ccxt
+requests
+boto3
+aiobotocore
+
+# Encryption
+timelock
+cryptography
+
+# Config
+python-dotenv
+
+# Async runtime (stdlib asyncio is sufficient)

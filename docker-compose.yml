@@ -1,0 +1,57 @@
+services:
+  fetcher:
+    build:
+      context: ..
+      dockerfile: miner/Dockerfile.fetcher
+    container_name: mantis-fetcher
+    env_file: .env
+    volumes:
+      - miner-data:/app/data
+      - miner-models:/app/saved_models
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  trainer:
+    build:
+      context: ..
+      dockerfile: miner/Dockerfile.trainer
+    container_name: mantis-trainer
+    env_file: .env
+    volumes:
+      - miner-data:/app/data
+      - miner-models:/app/saved_models
+    restart: unless-stopped
+    depends_on:
+      - fetcher
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  submitter:
+    build:
+      context: ..
+      dockerfile: miner/Dockerfile.submitter
+    container_name: mantis-submitter
+    env_file: .env
+    volumes:
+      - miner-data:/app/data:ro
+      - miner-models:/app/saved_models:ro
+      - ${HOME}/.bittensor:/root/.bittensor:ro  # Wallet files (read-only)
+    restart: unless-stopped
+    depends_on:
+      - fetcher
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+volumes:
+  miner-data:
+  miner-models:
