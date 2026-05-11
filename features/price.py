@@ -22,21 +22,32 @@ class PriceFeatures(FeatureEngine):
 
     warmup = 720  # need at least 720 bars for rolling windows
 
-    def compute(self, prices: np.ndarray, volumes: np.ndarray | None = None) -> np.ndarray:
+    # Fixed output size: 25 (price) + 3 (FRED macro) + 1 (GNews crypto) = 29
+    OUTPUT_DIM = 29
+
+    def compute(
+        self,
+        prices: np.ndarray,
+        volumes: np.ndarray | None = None,
+        fred: dict[str, float] | None = None,
+        gnews_crypto: float = 0.0,
+    ) -> np.ndarray:
         """Compute all price features.
 
         Args:
             prices: 1-D close price array (most recent last)
             volumes: optional 1-D volume array
+            fred: optional dict of FRED macro values
+            gnews_crypto: GNews crypto sentiment score in [-1, 1]
 
         Returns:
-            1-D feature vector
+            1-D feature vector (29 dims)
         """
         prices = np.asarray(prices, dtype=float)
         eps = 1e-12
 
         if len(prices) < self.warmup:
-            return np.zeros(30, dtype=float)
+            return np.zeros(self.OUTPUT_DIM, dtype=float)
 
         features = []
 
@@ -139,6 +150,15 @@ class PriceFeatures(FeatureEngine):
             features.append(np.corrcoef(r[:-1], r[1:])[0, 1])
         else:
             features.append(0.0)
+
+        # --- FRED macro context (3 dims) ---
+        fred = fred or {}
+        features.append(fred.get("fed_funds_rate", 0.0))
+        features.append(fred.get("treasury_spread_10y2y", 0.0))
+        features.append(fred.get("dxy_broad", 0.0))
+
+        # --- GNews crypto sentiment (1 dim) ---
+        features.append(gnews_crypto)
 
         return np.array(features, dtype=float)
 
