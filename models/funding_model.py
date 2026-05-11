@@ -1,0 +1,63 @@
+"""FUNDING-XSEC model: pooled 20-asset funding change model."""
+
+from pathlib import Path
+
+import joblib
+import lightgbm as lgb
+import numpy as np
+from sklearn.metrics import roc_auc_score
+
+import miner.config as mcfg
+from miner.models.base import BaseModel
+
+
+class FundingModel(BaseModel):
+    """Single LightGBM binary classifier trained on pooled 20-asset funding data.
+
+    Output: {asset: score in [-1, 1]} where positive = above-median funding change expected.
+    """
+
+    challenge_name = "funding_xsec"
+
+    def __init__(self):
+        self.model: lgb.LGBMClassifier | None = None
+
+    def train(self, features: np.ndarray, labels: np.ndarray, **kwargs) -> dict:
+        n = len(labels)
+        weights = self.recency_weights(n)
+        split = int(n * 0.9)
+
+        params = {**mcfg.LIGHTGBM_PARAMS, "objective": "binary"}
+        self.model = lgb.LGBMClassifier(**params)
+        self.model.fit(
+            features[:split], labels[:split],
+            sample_weight=weights[:split],
+            eval_set=[(features[split:], labels[split:])],
+            callbacks=[lgb.early_stopping(mcfg.LIGHTGBM_PARAMS["early_stopping_rounds"], verbose=False)],
+        )
+
+        y_pred = self.model.predict_proba(features[split:])[:, 1]
+        auc = roc_auc_score(labels[split:], y_pred)
+
+        return {"auc": auc, "n_samples": n}
+
+    def predict(self, features: dict[str, np.ndarray]) -> dict[str, float]:
+        result = {}
+        if self.model is None:
+            return {a: 0.0 for a in features}
+
+        for asset, x in features.items():
+            proba = self.model.predict_proba(x.reshape(1, -1))[0, 1]
+            score = 2.0 * proba - 1.0 + np.random.normal(0, 0.005)
+            result[asset] = float(np.clip(score, -1.0, 1.0))
+
+        return result
+
+    def save(self, path: Path | None = None) -> Path:
+        path = path or self.get_model_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(self.model, path)
+        return path
+
+    def load(self, path: Path) -> None:
+        self.model = joblib.load(path)
