@@ -5,6 +5,7 @@ services:
       dockerfile: miner/Dockerfile.fetcher
     container_name: mantis-fetcher
     env_file: .env
+    network_mode: host
     volumes:
       - miner-data:/app/data
       - miner-models:/app/saved_models
@@ -21,6 +22,7 @@ services:
       dockerfile: miner/Dockerfile.trainer
     container_name: mantis-trainer
     env_file: .env
+    network_mode: host
     volumes:
       - miner-data:/app/data
       - miner-models:/app/saved_models
@@ -39,10 +41,11 @@ services:
       dockerfile: miner/Dockerfile.submitter
     container_name: mantis-submitter
     env_file: .env
+    network_mode: host
     volumes:
       - miner-data:/app/data:ro
       - miner-models:/app/saved_models:ro
-      - ${HOME}/.bittensor:/root/.bittensor:ro  # Wallet files (read-only)
+      - ${HOME}/.bittensor:/root/.bittensor:ro
     restart: unless-stopped
     depends_on:
       - fetcher

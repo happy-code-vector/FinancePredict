@@ -31,7 +31,7 @@ YF_TICKERS = {
     "CADUSD": "CADUSD=X",
     "NZDUSD": "NZDUSD=X",
     "CHFUSD": "CHFUSD=X",
-    "XAGUSD": "XAGUSD=X",
+    "XAGUSD": "SI=F",  # Silver futures
 }
 
 

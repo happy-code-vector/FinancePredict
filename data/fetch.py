@@ -23,7 +23,7 @@ YF_TICKERS = {
     "CADUSD": "CADUSD=X",
     "NZDUSD": "NZDUSD=X",
     "CHFUSD": "CHFUSD=X",
-    "XAGUSD": "XAGUSD=X",
+    "XAGUSD": "SI=F",  # Silver futures (XAGUSD=X is delisted)
 }
 
 
@@ -167,10 +167,7 @@ async def fred_loop(store: Store) -> None:
             now = datetime.now(timezone.utc)
             # Store as synthetic "asset" rows for feature computation
             for name, val in values.items():
-                store.execute(
-                    "INSERT OR REPLACE INTO prices VALUES (?, ?, NULL, NULL, NULL, ?, NULL)",
-                    [(f"FRED_{name}", now, val)],
-                )
+                store.insert_prices([(f"FRED_{name}", now, None, None, None, val, None)])
             logger.debug("Stored %d FRED series", len(values))
 
         await asyncio.sleep(14400)
@@ -246,10 +243,7 @@ async def gnews_loop(store: Store) -> None:
         if scores:
             now = datetime.now(timezone.utc)
             for topic, score in scores.items():
-                store.execute(
-                    "INSERT OR REPLACE INTO sentiment VALUES (?, ?, NULL, NULL, NULL, NULL)",
-                    [(f"GNEWS_{topic}", now, score)],
-                )
+                store.insert_sentiment([(f"GNEWS_{topic}", now, score, None, None, None)])
             logger.debug("Stored %d GNews sentiment scores", len(scores))
 
         await asyncio.sleep(1800)
